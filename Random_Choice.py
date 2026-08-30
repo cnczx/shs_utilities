@@ -10,7 +10,7 @@ BORDER_COLOR = "#B0B0B0"
 class RandomChoiceApp:
     def __init__(self):
         self.root = tk.Tk()
-        self.root.title("随机选号v1.0")
+        self.root.title("随机选号")
         self.root.geometry("250x180")
         self.root.attributes('-topmost', True)
         self.root.overrideredirect(True)
@@ -137,6 +137,7 @@ class RandomChoiceApp:
 
     def open_settings(self):
         if self.settings_window and self.settings_window.winfo_exists():
+            self.settings_window.deiconify()
             self.settings_window.lift()
             return
 
@@ -147,6 +148,8 @@ class RandomChoiceApp:
         self.settings_window.overrideredirect(True)
         self.settings_window.resizable(False, False)
         self.settings_window.configure(bg=BORDER_COLOR)
+        # 先隐藏，设置好位置后再显示，避免闪烁
+        self.settings_window.withdraw()
 
         self.settings_container = tk.Frame(self.settings_window, bg='SystemButtonFace')
         self.settings_container.place(x=2, y=2, width=246, height=196)
@@ -180,7 +183,6 @@ class RandomChoiceApp:
         # 按钮行：Save 居中
         btn_frame = tk.Frame(self.settings_container)
         btn_frame.grid(row=4, column=0, columnspan=2, pady=(10, 25), sticky="ew")
-        # 三列布局：左占位 - Save - 右占位
         btn_frame.grid_columnconfigure(0, weight=1)
         btn_frame.grid_columnconfigure(1, weight=0)
         btn_frame.grid_columnconfigure(2, weight=1)
@@ -188,7 +190,7 @@ class RandomChoiceApp:
         save_btn = tk.Button(btn_frame, text="保存设置", command=self.save_settings)
         save_btn.grid(row=0, column=1, padx=5)
 
-        # Info 按钮放置在设置容器右下角（使用 place）
+        # Info 按钮右下角
         info_btn = tk.Button(self.settings_container, text="ⓘ", font=("Arial", 10),
                              relief="flat", bd=0, highlightthickness=0,
                              command=self.open_info_window)
@@ -204,7 +206,10 @@ class RandomChoiceApp:
         self.bind_drag_events(self.settings_window)
         self.bind_drag_events(self.settings_container)
 
+        # 定位窗口（但不显示）
         self.position_settings_window()
+        # 显示窗口
+        self.settings_window.deiconify()
 
     def position_settings_window(self):
         self.settings_window.update_idletasks()
@@ -232,6 +237,7 @@ class RandomChoiceApp:
 
     def open_info_window(self):
         if self.info_window and self.info_window.winfo_exists():
+            self.info_window.deiconify()
             self.info_window.lift()
             self.info_window.focus_force()
             return
@@ -243,6 +249,8 @@ class RandomChoiceApp:
         self.info_window.overrideredirect(True)
         self.info_window.resizable(False, False)
         self.info_window.configure(bg=BORDER_COLOR)
+        # 先隐藏，设置好位置后再显示
+        self.info_window.withdraw()
 
         info_container = tk.Frame(self.info_window, bg='SystemButtonFace')
         info_container.pack(fill="both", expand=True, padx=2, pady=2)
@@ -270,7 +278,10 @@ class RandomChoiceApp:
         self.bind_drag_events(self.info_window)
         self.bind_drag_events(info_container)
 
+        # 定位窗口
         self.position_info_window()
+        # 显示窗口
+        self.info_window.deiconify()
         self.info_window.lift()
         self.info_window.focus_force()
 
