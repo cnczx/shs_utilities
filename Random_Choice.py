@@ -11,7 +11,8 @@ class RandomChoiceApp:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("随机选号")
-        self.root.geometry("250x180")
+        # 主窗口固定为 200x150
+        self.root.geometry("200x150")
         self.root.attributes('-topmost', True)
         self.root.overrideredirect(True)
         self.root.resizable(False, False)
@@ -23,9 +24,10 @@ class RandomChoiceApp:
         self.settings_window = None
         self.info_window = None
 
+        # 内部容器尺寸 = 窗口尺寸 - 2*边框
         self.main_container = tk.Frame(self.root, bg='SystemButtonFace',
                                        highlightthickness=0, bd=0)
-        self.main_container.place(x=2, y=2, width=246, height=176)
+        self.main_container.place(x=2, y=2, width=196, height=146)
 
         self.create_widgets()
         self.position_window_left_bottom()
@@ -57,14 +59,16 @@ class RandomChoiceApp:
             print(f"保存设置失败: {e}")
 
     def create_widgets(self):
+        # 左上角标题（字体稍缩小）
         self.title_label = tk.Label(self.main_container, text="随机选号",
-                                    font=("Arial", 10))
-        self.title_label.place(relx=0.0, x=5, y=5, anchor="nw")
+                                    font=("Arial", 9))
+        self.title_label.place(relx=0.0, x=5, y=3, anchor="nw")
 
-        self.close_bg = tk.Frame(self.main_container, bg="red", width=20, height=20)
-        self.close_bg.place(relx=1.0, x=-5, y=5, anchor="ne")
+        # 右上角红色衬底 + 关闭按钮（尺寸微调）
+        self.close_bg = tk.Frame(self.main_container, bg="red", width=18, height=18)
+        self.close_bg.place(relx=1.0, x=-4, y=4, anchor="ne")
         self.close_bg.pack_propagate(False)
-        self.close_btn = tk.Button(self.close_bg, text="×", font=("Arial", 12),
+        self.close_btn = tk.Button(self.close_bg, text="×", font=("Arial", 10),
                                    command=self.root.destroy, relief="flat",
                                    bd=0, highlightthickness=0,
                                    bg="red", fg="white",
@@ -72,19 +76,22 @@ class RandomChoiceApp:
                                    activeforeground="white")
         self.close_btn.pack(fill="both", expand=True)
 
+        # 中间 Random Choice 按钮（字体稍缩小）
         self.random_btn = tk.Button(self.main_container, text="随机选号",
-                                    font=("Arial", 14), width=15,
+                                    font=("Arial", 12), width=12,
                                     command=self.random_choice)
         self.random_btn.place(relx=0.5, rely=0.5, anchor="center")
 
-        self.result_label = tk.Label(self.main_container, text="", font=("Arial", 16),
+        # 结果显示标签
+        self.result_label = tk.Label(self.main_container, text="", font=("Arial", 14),
                                      fg="blue")
         self.result_label.place(relx=0.5, rely=0.75, anchor="center")
 
+        # 右下角 Settings 按钮（字体稍缩小）
         self.settings_btn = tk.Button(self.main_container, text="设置",
-                                      font=("Arial", 8), relief="ridge",
+                                      font=("Arial", 7), relief="ridge",
                                       command=self.open_settings)
-        self.settings_btn.place(relx=1.0, rely=1.0, x=-5, y=-5, anchor="se")
+        self.settings_btn.place(relx=1.0, rely=1.0, x=-4, y=-4, anchor="se")
 
     def get_work_area(self):
         try:
@@ -111,16 +118,17 @@ class RandomChoiceApp:
         self.root.geometry(f"{win_width}x{win_height}+{x}+{y}")
 
     def bind_drag_events(self, widget):
-        widget.bind("<Button-1>", self.start_drag)
-        widget.bind("<B1-Motion>", self.on_drag)
+        widget.bind("<Button-1>", lambda e, w=widget: self.start_drag(e, w))
+        widget.bind("<B1-Motion>", lambda e, w=widget: self.on_drag(e, w))
 
-    def start_drag(self, event):
-        top = event.widget.winfo_toplevel()
-        top._drag_start_x = event.x_root - top.winfo_x()
-        top._drag_start_y = event.y_root - top.winfo_y()
+    def start_drag(self, event, widget):
+        if event.widget == widget:
+            top = widget.winfo_toplevel()
+            top._drag_start_x = event.x_root - top.winfo_x()
+            top._drag_start_y = event.y_root - top.winfo_y()
 
-    def on_drag(self, event):
-        top = event.widget.winfo_toplevel()
+    def on_drag(self, event, widget):
+        top = widget.winfo_toplevel()
         if hasattr(top, '_drag_start_x') and hasattr(top, '_drag_start_y'):
             x = event.x_root - top._drag_start_x
             y = event.y_root - top._drag_start_y
@@ -143,72 +151,66 @@ class RandomChoiceApp:
 
         self.settings_window = tk.Toplevel(self.root)
         self.settings_window.title("设置")
-        self.settings_window.geometry("250x200")
+        # 设置窗口固定为 200x150
+        self.settings_window.geometry("150x150")
         self.settings_window.attributes('-topmost', True)
         self.settings_window.overrideredirect(True)
         self.settings_window.resizable(False, False)
         self.settings_window.configure(bg=BORDER_COLOR)
-        # 先隐藏，设置好位置后再显示，避免闪烁
-        self.settings_window.withdraw()
+        self.settings_window.withdraw()  # 先隐藏，避免闪烁
 
+        # 内部容器尺寸
         self.settings_container = tk.Frame(self.settings_window, bg='SystemButtonFace')
-        self.settings_container.place(x=2, y=2, width=246, height=196)
+        self.settings_container.place(x=2, y=2, width=146, height=146)
 
-        # 左上角标题
+        # 左上角标题（字体缩小）
         title_label = tk.Label(self.settings_container, text="设置",
-                               font=("Arial", 12))
-        title_label.grid(row=0, column=0, columnspan=2, pady=(0, 5))
+                               font=("Arial", 10))
+        title_label.grid(row=0, column=0, columnspan=3, pady=(2, 2))
 
-        # 最小值输入
-        tk.Label(self.settings_container, text="最小值:").grid(row=1, column=0,
-                                                            padx=5, pady=5, sticky="e")
-        self.min_entry = tk.Entry(self.settings_container, width=10)
-        self.min_entry.grid(row=1, column=1, padx=5, pady=5)
+        # 最小值输入（字体缩小，间距减小）
+        tk.Label(self.settings_container, text="最小值:", font=("Arial", 8)).grid(row=1, column=0,
+                                                                              padx=3, pady=2, sticky="e")
+        self.min_entry = tk.Entry(self.settings_container, width=8, font=("Arial", 8))
+        self.min_entry.grid(row=1, column=1, padx=3, pady=2)
         self.min_entry.insert(0, str(self.min_val))
 
         # 最大值输入
-        tk.Label(self.settings_container, text="最大值:").grid(row=2, column=0,
-                                                            padx=5, pady=5, sticky="e")
-        self.max_entry = tk.Entry(self.settings_container, width=10)
-        self.max_entry.grid(row=2, column=1, padx=5, pady=5)
+        tk.Label(self.settings_container, text="最大值:", font=("Arial", 8)).grid(row=2, column=0,
+                                                                              padx=3, pady=2, sticky="e")
+        self.max_entry = tk.Entry(self.settings_container, width=8, font=("Arial", 8))
+        self.max_entry.grid(row=2, column=1, padx=3, pady=2)
         self.max_entry.insert(0, str(self.max_val))
 
-        # 排除项输入
-        tk.Label(self.settings_container, text="排除项(逗号分隔):").grid(row=3, column=0,
-                                                                     padx=5, pady=5, sticky="e")
-        self.exclude_entry = tk.Entry(self.settings_container, width=20)
-        self.exclude_entry.grid(row=3, column=1, padx=5, pady=5)
+        # 排除项输入（标签缩短）
+        tk.Label(self.settings_container, text="排除项:", font=("Arial", 8)).grid(row=3, column=0,
+                                                                              padx=3, pady=2, sticky="e")
+        self.exclude_entry = tk.Entry(self.settings_container, width=14, font=("Arial", 8))
+        self.exclude_entry.grid(row=3, column=1, padx=3, pady=2)
         self.exclude_entry.insert(0, ", ".join(map(str, self.exclude_list)))
 
         # 按钮行：Save 居中
         btn_frame = tk.Frame(self.settings_container)
-        btn_frame.grid(row=4, column=0, columnspan=2, pady=(10, 25), sticky="ew")
+        btn_frame.grid(row=4, column=0, columnspan=2, pady=(4, 18), sticky="ew")
         btn_frame.grid_columnconfigure(0, weight=1)
         btn_frame.grid_columnconfigure(1, weight=0)
         btn_frame.grid_columnconfigure(2, weight=1)
 
-        save_btn = tk.Button(btn_frame, text="保存设置", command=self.save_settings)
-        save_btn.grid(row=0, column=1, padx=5)
+        save_btn = tk.Button(btn_frame, text="保存", font=("Arial", 8),
+                             command=self.save_settings)
+        save_btn.grid(row=0, column=1, padx=3)
 
-        # Info 按钮右下角
-        info_btn = tk.Button(self.settings_container, text="ⓘ", font=("Arial", 10),
+        # Info 按钮右下角（字体缩小）
+        info_btn = tk.Button(self.settings_container, text="ⓘ", font=("Arial", 8),
                              relief="flat", bd=0, highlightthickness=0,
                              command=self.open_info_window)
-        info_btn.place(relx=1.0, rely=1.0, x=-5, y=-5, anchor="se")
+        info_btn.place(relx=1.0, rely=1.0, x=-3, y=-3, anchor="se")
 
-        # 强制更新布局
-        self.settings_container.update()
-        req_height = self.settings_container.winfo_reqheight()
-        total_height = req_height + 4
-        self.settings_window.geometry(f"250x{total_height}")
-        self.settings_container.place(x=2, y=2, width=246, height=req_height)
-
+        # 不再动态调整高度，直接使用固定尺寸
         self.bind_drag_events(self.settings_window)
         self.bind_drag_events(self.settings_container)
 
-        # 定位窗口（但不显示）
         self.position_settings_window()
-        # 显示窗口
         self.settings_window.deiconify()
 
     def position_settings_window(self):
@@ -249,7 +251,6 @@ class RandomChoiceApp:
         self.info_window.overrideredirect(True)
         self.info_window.resizable(False, False)
         self.info_window.configure(bg=BORDER_COLOR)
-        # 先隐藏，设置好位置后再显示
         self.info_window.withdraw()
 
         info_container = tk.Frame(self.info_window, bg='SystemButtonFace')
@@ -278,9 +279,7 @@ class RandomChoiceApp:
         self.bind_drag_events(self.info_window)
         self.bind_drag_events(info_container)
 
-        # 定位窗口
         self.position_info_window()
-        # 显示窗口
         self.info_window.deiconify()
         self.info_window.lift()
         self.info_window.focus_force()
